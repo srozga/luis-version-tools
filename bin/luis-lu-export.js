@@ -18,6 +18,7 @@ program
     .option('--model [model file]', 'The destination .lu file')
     .option('--versionId [versionId]', 'The version id to export')
     .option('--luisrc [luisrc file]', 'The .luisrc file we want to use, perhaps if we want to use a different LUIS app if you have an app per environment setup.')
+    .option('--verbose')
     .parse(process.argv);
 
 if(!program.model) {
