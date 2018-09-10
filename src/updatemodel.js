@@ -135,7 +135,11 @@ function runLudown(program, version, applicationJson) {
         throw new Error('Issue with ludown: ' + ludownCmdResult);
     }
     const filename = replaceExt(program.model, '.json');
-    fs.renameSync(`${n}.json`, filename);
+    if(fs.existsSync(`${n}.json`)) {
+        fs.renameSync(`${n}.json`, filename);
+    } else {
+        fs.renameSync(`${n}`, filename);
+    }
     return filename;
 }
 
