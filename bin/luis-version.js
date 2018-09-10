@@ -18,6 +18,7 @@ program
     .option('--region [region]', 'The region where the app is deployed')
     .option('--publish', 'Publishes the new version of the application')
     .option('--model [model file]', 'The .lu file supporting the application')
+    .option('--luisrc [luisrc file]', 'The .luisrc file we want to use, perhaps if we want to use a different LUIS app if you have an app per environment setup.')
     .parse(process.argv);
 
 if(!program.model) {

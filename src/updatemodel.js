@@ -10,13 +10,18 @@ const VersionFile = '.luis-app-version';
 const LuisRcFile = '.luisrc';
 
 exports.updateModel = function (program) {
+    let luisrcFile = LuisRcFile;
+    if(program.luisrc) {
+        luisrcFile = program.luisrc;
+    }
+
     const appConfig = {
         appId: program.appId,
         authoringKey: program.authoringKey,
         endpointBasePath: program.region ? `https://${program.region}.api.cognitive.microsoft.com/luis/api/v2.0` : undefined
     };
-    if (fs.existsSync(LuisRcFile)) {
-        const luisrc = JSON.parse(textFile.readSync(LuisRcFile));
+    if (fs.existsSync(luisrcFile)) {
+        const luisrc = JSON.parse(textFile.readSync(luisrcFile));
         if (!appConfig.appId) appConfig.appId = luisrc.appId;
         if (!appConfig.authoringKey) appConfig.authoringKey = luisrc.authoringKey;
         if (!appConfig.endpointBasePath) appConfig.endpointBasePath = luisrc.endpointBasePath;
