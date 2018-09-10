@@ -9,23 +9,41 @@ const replaceExt = require('replace-ext');
 const VersionFile = '.luis-app-version';
 const LuisRcFile = '.luisrc';
 
-exports.updateModel = function (program) {
-    let luisrcFile = LuisRcFile;
-    if(program.luisrc) {
-        luisrcFile = program.luisrc;
-    }
+exports.exportlu = function (program) {
+    const appConfig = setupAppConfig(program);
 
-    const appConfig = {
-        appId: program.appId,
-        authoringKey: program.authoringKey,
-        endpointBasePath: program.region ? `https://${program.region}.api.cognitive.microsoft.com/luis/api/v2.0` : undefined
-    };
-    if (fs.existsSync(luisrcFile)) {
-        const luisrc = JSON.parse(textFile.readSync(luisrcFile));
-        if (!appConfig.appId) appConfig.appId = luisrc.appId;
-        if (!appConfig.authoringKey) appConfig.authoringKey = luisrc.authoringKey;
-        if (!appConfig.endpointBasePath) appConfig.endpointBasePath = luisrc.endpointBasePath;
+    try {
+        let latestVersion = program.versionId;
+        if (latestVersion) {
+            console.log(chalk.default.green(`Using version ${latestVersion} ...`));
+        } else {
+            console.log(chalk.default.green('Fetching versions ...'));
+            const getVersions = `luis list versions --appId ${appConfig.appId} --authoringKey ${appConfig.authoringKey}`;
+            const getVersionsResult = JSON.parse(npmrun.execSync(getVersions));
+            latestVersion = getVersionsResult[getVersionsResult.length - 1].version;
+        }
+
+        console.log(chalk.default.green(`Exporting version ${latestVersion} ...`));
+        const exportCmd = `luis export version --appId ${appConfig.appId} --authoringKey ${appConfig.authoringKey} --versionId ${latestVersion} > temp.json`;
+        const exportCmdResult = npmrun.execSync(exportCmd);
+
+        console.log(chalk.default.green(`Refreshing .lu ...`));
+        const ludownCmd = `ludown refresh -i temp.json -n ${program.model}`;
+        const ludownCmdResult = npmrun.execSync(ludownCmd);
+
+        console.log(chalk.default.green(`Done! Created ${program.model} ...`));
+
+        if (ludownCmdResult.toString().length > 0) {
+            // there was an issue with ludown
+            throw new Error('Issue with ludown: ' + ludownCmdResult);
+        }
+    } catch (error) {
+        console.log(chalk.default.redBright(`Unexpected error: ${error}`));
     }
+};
+
+exports.updateModel = function (program) {
+    const appConfig = setupAppConfig(program);
 
     if (!fs.existsSync(program.model)) {
         console.log(chalk.default.redBright(`Model ${program.model} not found`));
@@ -135,7 +153,7 @@ function runLudown(program, version, applicationJson) {
         throw new Error('Issue with ludown: ' + ludownCmdResult);
     }
     const filename = replaceExt(program.model, '.json');
-    if(fs.existsSync(`${n}.json`)) {
+    if (fs.existsSync(`${n}.json`)) {
         fs.renameSync(`${n}.json`, filename);
     } else {
         fs.renameSync(`${n}`, filename);
@@ -224,4 +242,24 @@ function trainVersion(version, appConfig) {
         }
         console.log(chalk.default.green('Done training ...'));
     }
+}
+
+function setupAppConfig(program) {
+    let luisrcFile = LuisRcFile;
+    if (program.luisrc) {
+        luisrcFile = program.luisrc;
+    }
+
+    const appConfig = {
+        appId: program.appId,
+        authoringKey: program.authoringKey,
+        endpointBasePath: program.region ? `https://${program.region}.api.cognitive.microsoft.com/luis/api/v2.0` : undefined
+    };
+    if (fs.existsSync(luisrcFile)) {
+        const luisrc = JSON.parse(textFile.readSync(luisrcFile));
+        if (!appConfig.appId) appConfig.appId = luisrc.appId;
+        if (!appConfig.authoringKey) appConfig.authoringKey = luisrc.authoringKey;
+        if (!appConfig.endpointBasePath) appConfig.endpointBasePath = luisrc.endpointBasePath;
+    }
+    return appConfig;
 }
