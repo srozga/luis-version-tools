@@ -128,7 +128,7 @@ exports.updateModel = function (program) {
             // }
         }
 
-        trainVersion(version, appConfig);
+        trainVersion(program, version, appConfig);
 
         if (program.publish) {
             if (!appConfig.endpointBasePath) {
@@ -196,7 +196,7 @@ function importVersion(program, appConfig, version, jsonFilename) {
     console.log(chalk.green(`Version ${version} imported.`));
 }
 
-function trainVersion(version, appConfig) {
+function trainVersion(program, version, appConfig) {
     console.log(chalk.default.green(`Training ${version}...`));
     // now we train the new version
     let notTrained = true;
