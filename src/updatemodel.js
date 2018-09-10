@@ -11,6 +11,7 @@ const LuisRcFile = '.luisrc';
 
 exports.exportlu = function (program) {
     const appConfig = setupAppConfig(program);
+    const tempJson = '___temp.json';
 
     try {
         let latestVersion = program.versionId;
@@ -24,11 +25,11 @@ exports.exportlu = function (program) {
         }
 
         console.log(chalk.default.green(`Exporting version ${latestVersion} ...`));
-        const exportCmd = `luis export version --appId ${appConfig.appId} --authoringKey ${appConfig.authoringKey} --versionId ${latestVersion} > temp.json`;
+        const exportCmd = `luis export version --appId ${appConfig.appId} --authoringKey ${appConfig.authoringKey} --versionId ${latestVersion} > ${tempJson}`;
         const exportCmdResult = npmrun.execSync(exportCmd);
 
         console.log(chalk.default.green(`Refreshing .lu ...`));
-        const ludownCmd = `ludown refresh -i temp.json -n ${program.model} --skip_header`;
+        const ludownCmd = `ludown refresh -i ${tempJson} -n ${program.model} --skip_header`;
         const ludownCmdResult = npmrun.execSync(ludownCmd);
 
         console.log(chalk.default.green(`Done! Created ${program.model} ...`));
@@ -39,6 +40,9 @@ exports.exportlu = function (program) {
         }
     } catch (error) {
         console.log(chalk.default.redBright(`Unexpected error: ${error}`));
+    }
+    if (fs.existsSync(tempJson)) {
+        fs.unlinkSync(tempJson);
     }
 };
 
