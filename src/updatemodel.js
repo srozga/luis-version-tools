@@ -28,7 +28,7 @@ exports.exportlu = function (program) {
         const exportCmdResult = npmrun.execSync(exportCmd);
 
         console.log(chalk.default.green(`Refreshing .lu ...`));
-        const ludownCmd = `ludown refresh -i temp.json -n ${program.model}`;
+        const ludownCmd = `ludown refresh -i temp.json -n ${program.model} --skip_header`;
         const ludownCmdResult = npmrun.execSync(ludownCmd);
 
         console.log(chalk.default.green(`Done! Created ${program.model} ...`));
