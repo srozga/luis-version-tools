@@ -189,7 +189,7 @@ function deleteVersion(program, version, appConfig) {
 function importVersion(program, appConfig, version, jsonFilename) {
     console.log(chalk.green(`Importing version ${version}...`));
     const updateCmd = `luis import version --appId ${appConfig.appId} --authoringKey ${appConfig.authoringKey} --in ${jsonFilename}`;
-    const updateCmdResult = npmrunExecSync(updateCmd, {}, progam);
+    const updateCmdResult = npmrunExecSync(updateCmd, {}, program);
 
     fs.unlinkSync(jsonFilename); // get rid of the old file
 
